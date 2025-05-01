@@ -59,12 +59,12 @@ function [Imu,mu,S4,Cpp,nstp,result]=Ispectrum(U,p1,p2,mu0,varargin)
 
 IspecParams=generateIspecParams(U,p1,p2,mu0);
 fclose('all');      %Seems to be necessary to avoid error with multiple calls CLR Nov 2016
-[status,result]= system(['"',fullfile(pwd,'..','libs','plots','Ispectrum','ispectrum.exe'),'" ',IspecParams]);
+[status,result]= system(['"',fullfile(pwd,'..','libs','Plots','Ispectrum','ispectrum'),'" ',IspecParams]);
 if status~=0
     error(result)
 end
 %NOTE: .dat and .log files are written in pwd
-fid=fopen([pwd,'\ispectrum.log'],'r');
+fid=fopen(fullfile(pwd,'ispectrum.log'),'r');
 logtxt=textscan(fid,'%s');
 if ~isempty(varargin)
     fprintf('Ustar      U1        U2        p1       p2     mu0   mu_o  mu_i      S4    sigP    sigNfc num \n')
@@ -80,7 +80,7 @@ if mu0>=1
 else
     Cpp=U/mu0^(p2-p1);
 end
-data=importdata([pwd,'\ispectrum.dat']);
+data=importdata(fullfile(pwd,'ispectrum.dat'));
 [~,ndata]=size(data);
 if ndata~=3
     fclose('all');
@@ -91,6 +91,6 @@ Imu=data(:,2);
 nstp=data(:,3);
 end
 fclose('all');
-delete([pwd,'\ispectrum.dat']);
-delete([pwd,'\ispectrum.log']);
+delete(fullfile(pwd,'ispectrum.dat'));
+delete(fullfile(pwd,'ispectrum.log'));
 return
