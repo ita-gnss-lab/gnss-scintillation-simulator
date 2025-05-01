@@ -74,7 +74,7 @@ function general_parameters = get_general_parameters(varargin)
     default_rx_pos          = [0.3876; 1.9942; 59.6780];   % [latitude (rad); longitude (rad); height (m)]
     default_rx_vel          = [0; 0; 0];                   % [v1, v2, v3] where: v1 = east-west, v2 = north-south, v3 = up-down velocity
     default_date_time       = [2014 01 02 10 00 00];       % Date/time as [YYYY MM DD hh mm ss]; consider converting to datetime in future versions.
-    default_prn             = 18;                          % Satellite PRN (must be within [0, 32])
+    default_prn             = 1;                           % Satellite PRN (must be within [0, 32])
     default_simulation_time = 300;                         % Total simulation time in seconds
     default_dt              = 0.01;                        % Sampling time in seconds
     default_ipp_height      = 350000;                      % IPP height in meters
