@@ -1,6 +1,6 @@
 # GNSS Scintillation Simulator
 
-This document provides a guide to the GNSS Scintillation Simulator, a MATLAB-based tool for simulating ionospheric scintillation effects on GNSS signals. This software is a refactored and enhanced version of the original simulator developed by the CU SENSE Lab.
+This document provides a guide to the Compact Phase-screen-based Scintillation Model (CPSSM), a MATLAB-based tool for simulating ionospheric scintillation effects on GNSS signals. This software is a refactored and enhanced version of the original simulator developed by the CU SENSE Lab.
 
 ## 1. What this software is about
 
