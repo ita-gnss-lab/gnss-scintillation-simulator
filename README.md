@@ -12,7 +12,7 @@ This simulator is based on the phase-screen method, which models the ionosphere 
 
 The GNSS Scintillation Simulator offers a wide range of features, including:
 
-*   **Multi-Constellation Support**: Simulates scintillation effects for multiple GNSS constellations, including GPS, Galileo, GLONASS, and BeiDou.
+*   **Multi-Constellation Support**: Simulates scintillation effects for GPS and Galileo constellations.
 *   **Flexible Configuration**: Allows users to customize various simulation parameters, such as receiver position and velocity, simulation time, and ionospheric conditions.
 *   **Automatic RINEX Data Handling**: Can automatically download and process RINEX files for ephemeris data.
 *   **Modular and Extensible Design**: The code is organized into a modular structure, making it easy to understand, modify, and extend.
