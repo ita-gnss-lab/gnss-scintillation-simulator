@@ -16,8 +16,8 @@ The GNSS Scintillation Simulator offers a wide range of features, including:
 *   **Flexible Configuration**: Allows users to customize various simulation parameters, such as receiver position and velocity, simulation time, and ionospheric conditions.
 *   **Automatic RINEX Data Handling**: Can automatically download and process RINEX files for ephemeris data.
 *   **Modular and Extensible Design**: The code is organized into a modular structure, making it easy to understand, modify, and extend.
-*   **Advanced Scintillation Modeling**: Implements a compact phase-screen-based scintillation model that can simulate weak, moderate, and strong scintillation conditions.
-*   **Comprehensive Output**: Generates a variety of outputs, including time series of amplitude and phase, detrended phase, and normalized Power Spectral Density (PSD).
+*   **Advanced Scintillation Modeling**: Implements a compact phase-screen-based scintillation model that can simulate weak and strong scintillation conditions.
+*   **Comprehensive Output**: Generates a variety of outputs, including time series of amplitude and phase, detrended phase, and normalized Power Spectral Density (PSD) for both amplitude and phase.
 
 ## 3. How to install and add to default MATLAB path on Linux and Windows
 
@@ -73,7 +73,7 @@ To use the GNSS Scintillation Simulator, you need to have MATLAB installed on yo
         error('Unknown operating system.');
     end
     ```
-    You can extend this for other operating systems. Then, `cpssm` should be called from the command window.
+    You can extend this for other operating systems. Then, `cpssm` should be callable from the command window.
 
 ## 4. How to use (some MWE commands) and how to get help
 
