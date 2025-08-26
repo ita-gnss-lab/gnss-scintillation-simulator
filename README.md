@@ -102,7 +102,6 @@ help cpssm
 This will display the function's documentation, including a detailed description of all the available parameters.
 
 ## 5. Authors
-[
 This refactored version of the GNSS Scintillation Simulator was developed by:
 
 *   **Rubem Vasconcelos Pacelli**
