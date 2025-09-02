@@ -161,8 +161,7 @@ preprop_phase_psd_1sided  = compute_psd_1sided(detrended_phase_realization, ...
 % part, but also the difracted part caused by the free-space
 % propagation
 % SEE: `plot(mu(mu>0), postprop_phase_psd_1sided)`
-% TODO: Substitute phase() by unwrap(angle()) later.
-postprop_phase_psd_1sided = compute_psd_1sided(phase(propagated_complex_field), ...
+postprop_phase_psd_1sided = compute_psd_1sided(unwrap(angle(propagated_complex_field)), ...
     nfft, doppler_frequency) / rhof_veff_ratio;
 
 %% Timeseries generation (and truncation)
