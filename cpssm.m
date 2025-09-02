@@ -1,16 +1,21 @@
 function out = cpssm(varargin)
-% cpssm Compact phase-screen-based scintillation model
+% cpssm 
+% 
+% Compact Phase-Screen-Based Scintillation Model
 %
 % Description:
-%   CPSSM (Compact phase-screen-based scintillation model) simulates
+%   CPSSM (Compact Phase-Screen-Based Scintillation Model) simulates
 %   ionospheric scintillation effects on GNSS signals. It performs:
 %     1. Input parsing of receiver origin, velocity, time span,
-%        constellations, SVIDs, simulation duration, sampling rate,
-%        IPP altitude, drift velocity, and plotting options.
-%     2. RINEX ephemeris loading and initial parameter setup.
+%        constellations, satellite vehicle identifiers (SVIDs), simulation 
+%        duration, sampling rate, IPP altitude, drift velocity, 
+%        and plotting options.
+%     2. Receiver Independent Exchange Format (RINEX) ephemeris loading 
+%        and initial parameter setup.
 %     3. Satellite scenario creation using satelliteScenario.
 %     4. Receiver platform definition (static or dynamic).
-%     5. LOS satellite determination and filtering by constellation and ID.
+%     5. Line-of-sight (LOS) satellite determination and filtering by 
+%        constellation and identifier (ID).
 %     6. Spectral parameter extrapolation (U, μ₀) across GNSS frequencies.
 %     7. Geometric computation of scintillation: time series, amplitude,
 %        phase, detrended phase, normalized PSD, and effective path ratio
@@ -55,7 +60,7 @@ function out = cpssm(varargin)
 %   'datetime'       -  (optional, datetime or NaN) A datetime object 
 %                       which defines the starting hh:mm:ss simulation
 %                       time. The ending time is defined as the starting
-%                       time plus the simulation duration. The difinition
+%                       time plus the simulation duration. The definition
 %                       of the DD/MM/YYYY of the simulation depends on the
 %                       RINEX file: if a RINEX file is downloaded, the
 %                       CPSSM uses the DD/MM/YYYY defined in this datetime.
@@ -88,7 +93,7 @@ function out = cpssm(varargin)
 %                         • BeiDou  : "B1", "B2", "B3"
 %                       The chosen frequency must be valid for the
 %                       specified constellations. For example, "L1" is a
-%                       valid label if `constealltion` is either
+%                       valid label if `constellation` is either
 %                       `"gps"` or `"all"'`. If `frequency` is set to
 %                       `"all"` then all frquency labels of the considered
 %                       constellation is chosen. On the other hand, if
@@ -113,7 +118,7 @@ function out = cpssm(varargin)
 %                       Default: false
 %
 %   'svid'            - (optional, string or string array) Satellite SVID.
-%                       If the user knows the exact satellites availabe for
+%                       If the user knows the exact satellites available for
 %                       the desired datetime, they can input their SVIDs.
 %                       For instance, for 24-Jun-2021 14:00:00, the user
 %                       may input `["G13", "G14"]` or just `"G13"`. The
@@ -146,7 +151,7 @@ function out = cpssm(varargin)
 %                       value should change per satellite as the
 %                       environment in which the scintillation is developed
 %                       must not be the same. However, if you set the same
-%                       input arguments, pasing the same seed guarantees
+%                       input arguments, parsing the same seed guarantees
 %                       reproducibility of the CPSSM output.
 %                       Default: 1
 %
@@ -161,9 +166,9 @@ function out = cpssm(varargin)
 %   'drift_vel_ned'    - (optional, m/s, 1x3 array) Ionosphere drift
 %                        velocity as [vdx, vdy, vdz] in NED
 %                        (Noth-East-Down), that is:
-%                         vdx: west-east velocity on the earth arc (eastward +),
-%                         vdy: south-north velocity on the earth arc (northward +),
-%                         vdy: up-down velocity (downward +).
+%                         vdx: south-north velocity on the earth arc (northward +),
+%                         vdy: west-east velocity on the earth arc (eastward +),
+%                         vdz: up-down velocity (downward +).
 %                       Default: [0; 100; 0].
 %
 %   'plot'             - (optional, logical scalar) A logical scalar
@@ -173,12 +178,12 @@ function out = cpssm(varargin)
 %                      Default: false
 %
 %   'play'             - (optional, logical scalar) A logical scalar
-%                      indicating whether a animation of the geometry
+%                      indicating whether an animation of the geometry
 %                      between the receiver and the satellites should be
 %                      shown. It does not not affect the simulation.
 %                      Default: false
 %
-% Author:
+% Authors:
 %   Rubem Vasconcelos Pacelli
 %   ORCID: https://orcid.org/0000-0001-5933-8565
 %   Email: rubem.engenharia@gmail.com
