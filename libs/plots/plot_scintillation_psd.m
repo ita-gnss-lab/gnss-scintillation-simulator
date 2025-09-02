@@ -71,6 +71,7 @@ for constellation = constellations
     freq_names = string(fieldnames(out.(constellation).spectral)).';
     % for all rx-sat scenario
     for i = 1:numel(out.(constellation).scenario)
+        % TODO: Scale the position of the figure, and Font sizes based on monitor's settings
         % Create new figure for each scenario
         fig = figure('Name', sprintf('%s Scintillation - Intensity & Phase PSDs', severity), 'Position',[50,50,1400,550]);
         set(fig, 'DefaultTextFontName', 'Helvetica');
