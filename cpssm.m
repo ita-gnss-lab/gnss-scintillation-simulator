@@ -217,9 +217,9 @@ if parsed_argins.is_play
     play(out.satelliteScenario);
 end
 
-% TODO: `out` should contain only two fields: `satelliteScenario`, and `scintillation`.
-% TODO: The latter doesn't exist at the moment. You should gather all other fields
-% TODO: (`severity`, the constellations, and `doppler_frequency_support` (to me removed))
-% TODO: and put them in the field called `scintillation`. This should require a strong
-% TODO: refactor across the codebase.
+% FIXME: `out` should contain only two fields: `satelliteScenario`, and `scintillation`.
+% FIXME: The latter doesn't exist at the moment. You should gather all other fields
+% FIXME: (`severity`, the constellations, and `doppler_frequency_support` (to me removed))
+% FIXME: and put them in the field called `scintillation`. This should require a strong
+% FIXME: refactor across the codebase.
 end

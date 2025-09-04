@@ -8,8 +8,10 @@ rx = sim_params.satelliteScenario.Platforms(1);
 % - U and μ₀: dependent only on the frequency (computed via extrapolation)
 % - p₁ and p₂: independent
 % - Doppler frequency: dependent only on t_samp and FFT samples
+
 % Frequency support where the PSD are plotted
-nfft = nicefftnum(sim_params.sim_time / sim_params.t_samp);
+% NOTE: The +1 is to account for the zero-instant timestamp in the temporal support
+nfft = nicefftnum((sim_params.sim_time / sim_params.t_samp)+1);
 % FIXME: At the moment, `doppler_frequency_support` is used to create an
 % FIXME: independent field in `out`. Instead of that, attach it to the
 % FIXME: PSDs by using a `table` to join the spectra and their respective
