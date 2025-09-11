@@ -71,6 +71,7 @@ function out = cpssm(varargin)
 %                       downloading a RINEX file, you must pass a datetime
 %                       whose year is 2016 or later because only RINEX
 %                       v3.04 is supported.
+%                       2021-06-24 14:00:00
 %
 %   'constellation'  -  (optional, string or string array) Desired
 %                       constellations. Valid constellations are `"gps"`,
