@@ -71,7 +71,7 @@ function out = cpssm(varargin)
 %                       downloading a RINEX file, you must pass a datetime
 %                       whose year is 2016 or later because only RINEX
 %                       v3.04 is supported.
-%                       2021-06-24 18:00:00
+%                       2021-06-24 23:00:00
 %
 %   'constellation'  -  (optional, string or string array) Desired
 %                       constellations. Valid constellations are `"gps"`,
@@ -121,7 +121,7 @@ function out = cpssm(varargin)
 %   'svid'            - (optional, string or string array) Satellite SVID.
 %                       If the user knows the exact satellites available for
 %                       the desired datetime, they can input their SVIDs.
-%                       For instance, for 24-Jun-2021 18:00:00, the user
+%                       For instance, for 24-Jun-2021 23:00:00, the user
 %                       may input `["G13", "G14"]` or just `"G13"`. The
 %                       SVIDs should be passed as an input if and only if
 %                       the `constellation` is not empty. Also, the SVIDs
