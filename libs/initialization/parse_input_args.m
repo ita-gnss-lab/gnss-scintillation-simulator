@@ -3,7 +3,7 @@ function [parsed_input_args, log] = parse_input_args(cspsm_root_dir, all_constel
 %% Define default values
 default_rx_origin       = [-23.2198 -45.8916  59.6780];         % [latitude (deg); longitude (deg); altitude (m)] -> São José dos Campos
 default_rx_vel_ned      = [0 0 0];                              % [v1, v2, v3] where: v1 = west-east, v2 = south-north, v3 = up-down velocity
-default_datetime        = datetime([2021 06 24 14 00 00]);      % datetime
+default_datetime        = datetime([2021 06 24 18 00 00]);      % datetime
 default_rinex_filename  = "BRDM00DLR_R_20170500000_01D_MN.rnx"; % RINEX file name.
 default_is_down_rinex   = false;                                % by default, do not download a RINEX file and use either the user-defined or default RINEX file
 default_svids           = "";                                   % SVIDs. Empty string means that it should be defined interactively

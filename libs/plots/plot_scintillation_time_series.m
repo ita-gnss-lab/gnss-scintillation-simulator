@@ -33,7 +33,7 @@ function plot_scintillation_time_series(out)
 severities = out.severity;
 
 %% Plot
-constellations = setxor(string(fieldnames(out)), ...
+constellations = setxor(string(fieldnames(out)).', ...
     ["doppler_frequency_support", "satelliteScenario", "severity"]);
 % for all constellation
 for constellation = constellations
@@ -45,6 +45,12 @@ for constellation = constellations
             % Create figure and set Helvetica as default font
             fig = figure('Name', sprintf('%s Magnitude & Phase ', severity), ...
                 'Position', [50, 50, 1400, 550], 'Color', 'w');
+            try
+                set(fig, 'WindowState', 'maximized');
+            catch
+                % Fallback for older MATLAB releases without WindowState support
+                set(fig, 'Units', 'normalized', 'OuterPosition', [0 0 1 1]);
+            end
             set(fig, 'DefaultTextFontName', 'Helvetica');
             tiledlayout(2, 1, "TileSpacing", "compact");
 

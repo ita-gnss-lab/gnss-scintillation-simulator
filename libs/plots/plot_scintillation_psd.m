@@ -64,16 +64,21 @@ frequency_support = out.doppler_frequency_support;
 
 %% PSD of amplitude and phase of the ionospheric scintllation
 % all constellation names
-constellations = setxor(string(fieldnames(out)), ...
+constellations = setxor(string(fieldnames(out)).', ...
     ["doppler_frequency_support", "satelliteScenario", "severity"]);
 for constellation = constellations
     % Frequency names for this constellation
     freq_names = string(fieldnames(out.(constellation).spectral)).';
     % for all rx-sat scenario
     for i = 1:numel(out.(constellation).scenario)
-        % TODO: Scale the position of the figure, and Font sizes based on monitor's settings
         % Create new figure for each scenario
         fig = figure('Name', sprintf('%s Scintillation - Intensity & Phase PSDs', severity), 'Position',[50,50,1400,550]);
+        try
+            set(fig, 'WindowState', 'maximized');
+        catch
+            % Fallback for older MATLAB releases without WindowState support
+            set(fig, 'Units', 'normalized', 'OuterPosition', [0 0 1 1]);
+        end
         set(fig, 'DefaultTextFontName', 'Helvetica');
         tiledlayout(2, numel(freq_names), "TileSpacing", "compact");
         sgtitle(sprintf('Scintillation PSD Analysis: Intensity & Phase (%s) for %s satellite %s', ...
