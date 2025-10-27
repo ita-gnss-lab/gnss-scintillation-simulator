@@ -101,9 +101,13 @@ addParameter(p, 'svid',       default_svids, ...
 addParameter(p, 'datetime',    default_datetime, ...
     @(x) validate_datetime(log, p.Results.download_rinex, ...
     p.Results.rinex_filename, x));
-% Add severity parameter: must be "weak", "moderate", or "strong"
+% Add severity parameter: must be "weak", "moderate", "strong" or "custom"
 addParameter(p, 'severity',    default_severity, ...
-    @(x) isscalar(string(x)) && ismember(x, ["weak", "moderate", "strong"]));
+    @(x) isscalar(string(x)) && ismember(x, ["weak", "moderate", "strong", "custom"]));
+
+% Add spectral parameter: optional struct used only when severity == 'custom'
+% It must be a struct (validated more strictly below when severity is custom)
+addParameter(p, 'spectral', [], @(x) isempty(x) || isstruct(x));
 
 % parse it
 parse(p, varargin{:});
@@ -136,6 +140,31 @@ parsed_input_args.severity            = string(p.Results.severity);             
 parsed_input_args.is_plot             = p.Results.plot;                         % whether plot the ionospheric scintillation realization
 parsed_input_args.is_play             = p.Results.play;                         % whether play an animation of the receiver and satellite geometry
 parsed_input_args.seed                = p.Results.seed;                         % simulation seed
+% spectral: when severity is 'custom', this must be a struct with required fields
+parsed_input_args.spectral            = p.Results.spectral;
+
+% If severity is 'custom', validate the provided spectral struct
+if parsed_input_args.severity == "custom"
+    if isempty(parsed_input_args.spectral)
+        log.error('', ['severity set to "custom" but no ''spectral'' argument was provided. When using severity=="custom", you must pass a struct with fields: U_ref, mu0_ref, p1, p2 (all positive doubles).']);
+    end
+    spec = parsed_input_args.spectral;
+    required_fields = {"U_ref","mu0_ref","p1","p2"};
+    for rf = required_fields
+        fname = rf{1};
+        if ~isfield(spec, fname)
+            log.error('', ['spectral struct must contain field "%s" when severity=="custom".'], fname);
+        end
+        val = spec.(fname);
+        if ~(isnumeric(val) && isscalar(val) && isfinite(val) && (double(val) > 0))
+            log.error('', ['spectral.%s must be a positive finite numeric scalar.'], fname);
+        end
+        % ensure it's double
+        spec.(fname) = double(val);
+    end
+    % store back sanitized spectral
+    parsed_input_args.spectral = spec;
+end
 
 end
 

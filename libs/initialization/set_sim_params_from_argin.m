@@ -47,6 +47,12 @@ sim_params.ipp_altitude = parsed_argin.ipp_altitude;
 %% Severity
 sim_params.severity = parsed_argin.severity;
 
+% If user provided custom spectral parameters, attach them to sim_params.const.spectral.custom
+if isfield(parsed_argin, 'spectral') && ~isempty(parsed_argin.spectral) && sim_params.severity == "custom"
+	% expect parsed_argin.spectral already validated by parse_input_args
+	sim_params.const.spectral.custom = parsed_argin.spectral;
+end
+
 %% Simulation time
 sim_params.sim_time = parsed_argin.sim_time;
 
