@@ -144,6 +144,17 @@ function out = cpssm(varargin)
 %                       outputs.
 %                       Default: "strong"
 %
+%   'spectral'        - (optional, struct): When `severity` is set to
+%                      `"custom"`, you may pass a scalar struct with the
+%                      reference spectral parameters to be used by the
+%                      extrapolation routine. The struct must contain the
+%                      numeric scalar fields: `U_ref`, `mu0_ref`, `p1`, and
+%                      `p2` (all > 0). Example:
+%                        spectral = struct('U_ref',0.5,'mu0_ref',0.7,'p1',2.5,'p2',3.4);
+%                      If omitted when `severity=="custom"`, the parser will
+%                      raise an error. For built-in severities ('weak',
+%                      'moderate', 'strong') this parameter is ignored.
+%
 %   'sim_time'        - (optional, seconds, scalar) Total simulation time.
 %                       Default: 300
 %
