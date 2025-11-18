@@ -34,12 +34,11 @@ function rhof_veff_ratio_ref = get_scaling_param(rx, sat, sim_params)
 %   Email: rdlfresearch@gmail.com
 
 %% Initalization
-% get receiver LLA (latitude [deg], longitude [deg], altitude [m]) trajectory and UTC time
+% get receiver and satellite trajectories/velocities (cached via UserData)
 % NOTE: `time_utc` sampling time is defined be `t_samp_geo`, which is an
 % internal parameter
-[rx_traj_lla_deg, rx_vel_ned, time_utc] = states(rx, 'CoordinateFrame','geographic');
-% get satellite LLA (latitude [deg], longitude [deg], altitude [m]) trajectory
-[sat_traj_lla_deg, sat_vel_ned, ~]= states(sat, 'CoordinateFrame','geographic');
+[rx_traj_lla_deg, rx_vel_ned, time_utc] = get_states_with_cache(rx);
+[sat_traj_lla_deg, sat_vel_ned, ~] = get_states_with_cache(sat);
 % drift velocity
 drift_vel_ned = sim_params.drift_vel_ned;
 % IPP altitude
@@ -74,4 +73,36 @@ rhof_veff_ratio_ref = mean( ...
     sqrt(effective_ipp_range) ./ (veff * sqrt((2 * pi * freq_ref) / c)) ...
     );
 
+end
+
+function [traj_deg, vel_ned, time_utc] = get_states_with_cache(entity)
+%GET_STATES_WITH_CACHE Retrieve cached states for receiver/satellite objects.
+    persistent state_cache
+    if isempty(state_cache)
+        state_cache = containers.Map('KeyType', 'char', 'ValueType', 'any');
+    end
+    key = get_state_cache_key(entity);
+    if isKey(state_cache, key)
+        cached = state_cache(key);
+        traj_deg = cached.traj_deg;
+        vel_ned = cached.vel_ned;
+        time_utc = cached.time;
+        return;
+    end
+    [traj_deg, vel_ned, time_utc] = states(entity, 'CoordinateFrame','geographic');
+    state_cache(key) = struct( ...
+        'traj_deg', traj_deg, ...
+        'vel_ned', vel_ned, ...
+        'time', time_utc);
+end
+
+function key = get_state_cache_key(entity)
+    if isprop(entity, 'Name')
+        entity_name = entity.Name;
+    else
+        entity_name = '';
+    end
+    key = jsonencode(struct( ...
+        'class', class(entity), ...
+        'name', entity_name));
 end
