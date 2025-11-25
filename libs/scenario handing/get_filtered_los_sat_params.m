@@ -33,7 +33,7 @@ function filtered_los_sat_params = get_filtered_los_sat_params(log, sim_params, 
     mask_deg = sim_params.elevation_mask_deg;
     rx = sat_scen.Platforms(1);
     sats = sat_scen.Satellites;
-    sat_names = arrayfun(@(s) strtrim(string(s.Name)), sats);
+    sat_names = arrayfun(@(s) strtrim(string(s.Name)), sats); % normalize scenario satellite names once
     keep = true(height(filtered_los_sat_params), 1);
     for i = 1:height(filtered_los_sat_params)
         sat_name = strtrim(string(filtered_los_sat_params.Source(i)));
@@ -50,4 +50,7 @@ function filtered_los_sat_params = get_filtered_los_sat_params(log, sim_params, 
         end
     end
     filtered_los_sat_params = filtered_los_sat_params(keep, :);
+    if height(filtered_los_sat_params) > sim_params.max_sats
+        filtered_los_sat_params = filtered_los_sat_params(1:sim_params.max_sats, :); % enforce cap to avoid simulating unused sats
+    end
 end

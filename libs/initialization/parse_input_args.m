@@ -19,7 +19,8 @@ default_severity        = "strong";                             % Ionospheric sc
 default_is_plot         = false;                                % Whether plot the ionospheric scintillation realization
 default_is_play         = false;                                % Whether play an animation of the receiver and satellite geometry
 default_seed            = 1;                                    % Default seed
-default_elev_mask_deg   = 25;                                    % Minimum elevation angle mask (deg)
+default_elev_mask_deg   = 25;                                   % Minimum elevation angle mask (deg)
+default_max_sats        = Inf;                                  % Maximum satellites to simulate
 
 %% Parsing phase 0: resolve the logging before anything else
 
@@ -112,6 +113,9 @@ addParameter(p, 'spectral', [], @(x) isempty(x) || isstruct(x));
 % Add elevation mask parameter: must be a nonnegative scalar (degrees)
 addParameter(p, 'elevation_mask_deg', default_elev_mask_deg, ...
     @(x) isnumeric(x) && isscalar(x) && isfinite(x) && (x >= 0));
+% Add maximum satellites parameter: positive scalar or Inf
+addParameter(p, 'max_sats', default_max_sats, ...
+    @(x) isnumeric(x) && isscalar(x) && (x > 0));
 
 % parse it
 parse(p, varargin{:});
@@ -147,6 +151,7 @@ parsed_input_args.seed                = p.Results.seed;                         
 % spectral: when severity is 'custom', this must be a struct with required fields
 parsed_input_args.spectral            = p.Results.spectral;
 parsed_input_args.elevation_mask_deg  = p.Results.elevation_mask_deg;           % minimum elevation angle (deg)
+parsed_input_args.max_sats            = p.Results.max_sats;                     % maximum satellites to simulate
 
 % If severity is 'custom', validate the provided spectral struct
 if parsed_input_args.severity == "custom"

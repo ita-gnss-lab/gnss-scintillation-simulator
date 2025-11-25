@@ -65,6 +65,9 @@ sim_params.is_multiconst_sats = parsed_argin.is_multiconst_sats;
 %% Elevation mask (deg)
 sim_params.elevation_mask_deg = parsed_argin.elevation_mask_deg;
 
+%% Max satellites to simulate
+sim_params.max_sats = parsed_argin.max_sats;  % cap how many satellites we bother simulating
+
 %% Scintillation sampling time
 % NOTE: this sampling time is the value used to obtain the scintillation
 % time series realization as well as its intensity and phase PSD
