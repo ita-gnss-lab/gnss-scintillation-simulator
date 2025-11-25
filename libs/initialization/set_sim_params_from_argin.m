@@ -62,9 +62,11 @@ sim_params.seed = parsed_argin.seed;
 %% Multiconstellation sats
 sim_params.is_multiconst_sats = parsed_argin.is_multiconst_sats;
 
+%% Elevation mask (deg)
+sim_params.elevation_mask_deg = parsed_argin.elevation_mask_deg;
+
 %% Scintillation sampling time
 % NOTE: this sampling time is the value used to obtain the scintillation
 % time series realization as well as its intensity and phase PSD
 sim_params.t_samp = parsed_argin.t_samp;
 end
-
