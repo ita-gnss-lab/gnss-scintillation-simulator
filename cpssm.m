@@ -183,6 +183,13 @@ function out = cpssm(varargin)
 %                         vdz: up-down velocity (downward +).
 %                       Default: [0; 100; 0].
 %
+%   'elevation_mask_deg' - (optional, degrees, scalar) Minimum elevation
+%                       angle mask applied during LOS filtering. Satellites
+%                       whose elevation drops below this mask at any time in
+%                       the simulation interval are discarded.
+%                       Nonnegative scalar; set to 0 to disable.
+%                       Default: 25
+%
 %   'plot'             - (optional, logical scalar) A logical scalar
 %                      indicating whether plots concerning the ionospheric
 %                      scintillation realization should be shown. It does
