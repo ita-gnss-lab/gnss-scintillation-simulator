@@ -1,7 +1,21 @@
-function IspecParams=generateIspecParams(U,p1,p2,mub)
-%USAGE:  IspecParams=generateIspecParams(U,p1,p2,mub)
+function IspecParams = generateIspecParams(U, p1, p2, mub, mu_outer, mu_inner)
+%USAGE:  IspecParams=generateIspecParams(U,p1,p2,mub[,mu_outer,mu_inner])
 %
 %Generates character parameter input for call to Spectrumintegration.exe
 %
-IspecParams=[num2str(U) ,' ', num2str(p1), ' ',num2str(p2), ' ',num2str(mub), ' 0.0 0.0'];
+if nargin < 5
+    mu_outer = 0.0;
+end
+if nargin < 6
+    mu_inner = 0.0;
+end
+
+IspecParams = [ ...
+    num2str(U), ' ', ...
+    num2str(p1), ' ', ...
+    num2str(p2), ' ', ...
+    num2str(mub), ' ', ...
+    num2str(mu_outer), ' ', ...
+    num2str(mu_inner) ...
+    ];
 end

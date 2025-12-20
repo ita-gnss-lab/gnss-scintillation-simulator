@@ -1,4 +1,4 @@
-function plot_scintillation_psd(cspsm_root_dir, out)
+function plot_scintillation_psd(cpssm_root_dir, out)
 % plot_all_amp_phase_psds
 %
 % Syntax:
@@ -89,7 +89,6 @@ for constellation = constellations
             % get parameters
             freq_name = freq_names(j);
             spectral_params = out.(constellation).spectral.(freq_name);
-            mu = out.(constellation).scenario(i).(freq_name).mu;
             rhof_veff_ratio = out.(constellation).scenario(i).(freq_name).rhof_veff_ratio;
             intensity_psd_1sided_post = out.(constellation).scenario(i).(freq_name).amplitude.psd_postprop;
             preprop_phase_psd_1sided = out.(constellation).scenario(i).(freq_name).phase.psd.preprop_1sided;
@@ -97,18 +96,28 @@ for constellation = constellations
             phase_psd_1sided_theory = out.(constellation).scenario(i).(freq_name).phase.psd.theo_phase;
             s4 = out.(constellation).scenario(i).(freq_name).S4;
 
-            % Compute Theoretical Intensity PSD (Interpolated)
-            [Imu, muAxis, theoretical_s4_val] = Ispectrum(cspsm_root_dir, ...
+            % Compute theoretical intensity spectrum I(mu) on a controlled mu-grid
+            % (interpolated from ispectrum's adaptive mu samples).
+            f_pos = frequency_support(frequency_support > 0);
+            mu_pos = 2 * pi * f_pos * rhof_veff_ratio;
+
+            [Imu, muAxis, theoretical_s4_val] = Ispectrum(cpssm_root_dir, ...
                 spectral_params.U, spectral_params.p1, spectral_params.p2, ...
                 spectral_params.mu0);
-            logImu_interp = interp1(log10(muAxis), log10(Imu), log10(mu(mu>0)), 'pchip', 'extrap');
+
+            Imu_safe = max(Imu, 1e-300);
+            logImu_interp = interp1(log10(muAxis), log10(Imu_safe), log10(mu_pos), 'pchip', 'extrap');
             Imu_interp = 10.^logImu_interp;
+            % Convert I(mu) to a PSD vs Hz for comparison with FFT-based PSDs.
+            % With mu = 2*pi*f*(rho_F/v_eff) and S4^2 = (1/2*pi)*∫ I(mu) dmu, we have:
+            % S4^2 = ∫ [(rho_F/v_eff) * I(mu(f))] df.
+            Imu_interp = rhof_veff_ratio * Imu_interp;
 
             % Plot Simulated Intensity PSD
             nexttile(j);
             hold on;
-            plot(frequency_support(frequency_support>0), 10*log10(intensity_psd_1sided_post), 'LineWidth', 1.2);
-            plot(frequency_support(frequency_support>0), 10*log10(Imu_interp), 'r--', 'LineWidth', 1.2);
+            plot(f_pos, 10*log10(intensity_psd_1sided_post), 'LineWidth', 1.2);
+            plot(f_pos, 10*log10(Imu_interp), 'r--', 'LineWidth', 1.2);
             set(gca, 'XScale', 'log', 'FontName', 'Helvetica', 'FontSize', 20);
             xlabel('Doppler Frequency (Hz)', 'FontName', 'Helvetica', 'FontSize', 20);
             ylabel('Intensity PSD [dB]', 'FontName', 'Helvetica', 'FontSize', 20);

@@ -1,108 +1,107 @@
-function [Imu,mu,S4,Cpp,nstp,result]=Ispectrum(cspsm_root_dir, U,p1,p2,mu0,varargin)
-%USAGE      [Imu,mu,S4,Cpp,nstp,result]=Ispectrum(U,p1,p2,mu0)
+function [Imu, mu, S4] = Ispectrum(cpssm_root_dir, U, p1, p2, mu0, varargin)
+%Ispectrum Compute the normalized intensity spectrum I(mu) using ispectrum(.exe).
 %
-%      Ispectrum Parameters
-%                U  = Universal strength parameter
-%                p1= Low wavenumber index
-%                p2= High wavenumber index
-%              mu0=Normalized break scale
-%        varargin=1 for output summary
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%NOTES
-%Program Description:
-% SpectrumIntegration.exe is a Windows compliation of C code Ispectrum
-%Compliation by Dennis Hancock   dennishancock@earthlink.net
-% Ispectrum  Computes the normalized intensity SDF for a plane wave that traverses a phase screen
-%             I(mu) = int_{-inf}^{inf} exp[-gamma(eta,mu)] exp(-i eta mu) d eta
-%The normalized screen SDF is specified as a piecewise power law
-%             {   muo^(-p1),          if  0<= mu <= muo,
-%       P(mu) = U1 {    mu^(-p1),          if muo < mu <= mub,
-%            {  mub^(p2-p1) mu^(-p2), if mub < mu <= mui,
-% where U1 = Cp rhof^(p1-1) and
-%          Cp   = phase spectral strength
-%         rhof = sqrt(z/wavk) is the Fresnel scale
-%          z    = distance past the screen
-%      wavk = signal wavenumber
-%          k    = transverse wavenumber
-%       mu   = rhof*k  normalized transverse wavenumber
-%      muo  = rhof*ko normalized outer scale wavenumber
-%      mub  = rhof*kb normalized break scale wavenumber
-%      mui  = rhof*ki normalized inner scale wavenumber
-%    We assume that 0 < muo < mub < mui and also that muo << muf << mui, where
-%        muf = 2*pi is the normalized wavenumber corresponding to the Fresnel scale.
-%    The structure interaction function gamma(eta,mu) is given by
-% gamma(eta,mu) =
-% 16 U1 int_{  0,muo} muo^(-p1)   sin^2(chi eta/2) sin^2(chi mu/2) d chi/(2 pi)
-% + 16 U1 int_{muo,mub}             sin^2(chi eta/2) sin^2(chi mu/2) d chi/(2 pi)
-% + 16 U1 int_{muo,mui} mub^(p2-p1) sin^2(chi eta/2) sin^2(chi mu/2) d chi/(2 pi)
-% Universal scattering strength U equals U1 if mub>=1 and U1 mub^(p2-p1) otherwise
-% This program fully supports the limiting cases muo->0 and/or mui->infinity
-%--------------------------------------------------------------------------------
-%  Program Usage: ispectrum U p1 p2 mub muo mui [mu] | ([mu_min] [mu_max] [mu_num])
-%  Calling options:
-% 1: ispectrum U p1 p2 mub muo mui
-%  2: ispectrum U p1 p2 mub muo mui mu
-% 3: ispectrum U p1 p2 mub muo mui mu_min mu_max mu_num
+% Uses ispectrum "option 1" (no mu-grid arguments): the executable computes S4
+% via adaptive quadrature and writes I(mu) samples (at integrator-chosen mu
+% points) to ispectrum.dat.
 %
-%Notes:
-% * Setting muo and/or mui to zero omits them from the model
-% Option1 uses adaptive quadrature to compute S4
-% * Option2 computes I(mu) at the specified value of mu
-%* Option3 computes I(mu) at log spaced mu values between mu_min and mu_max
-%* The intensity SDF I(mu) is written to ispectrum.dat
-%* Parameters and moments are written to ispectrum.log
-%     Written by Charles Carrano, Boston College (charles.carrano@bc.edu
-%    For additional details, see
-%    Carrano, C. S., and C. L. Rino (2016), A theory of scintillation for two-component
-%      power law irregularity spectra: Overview and numerical results, Radio Sci.,
-%      51, 789–813, doi:10.1002/2015RS005903.
+% Calling convention:
+%   [Imu, mu, S4] = Ispectrum(cpssm_root_dir, U, p1, p2, mu0)
+%
+% Parameters:
+%   cpssm_root_dir - Path to the CPSMM root (contains libs/plots/Ispectrum/)
+%   U    - universal strength parameter
+%   p1   - low-wavenumber index
+%   p2   - high-wavenumber index
+%   mu0  - normalized break scale (called "mub" in ispectrum.c help text)
+%
+% Optional name/value arguments:
+%   'mu_outer' : normalized outer-scale wavenumber (default 0, omit)
+%   'mu_inner' : normalized inner-scale wavenumber (default 0, omit)
+%
+% Outputs:
+%   Imu - intensity spectrum samples I(mu)
+%   mu  - mu values at which I(mu) was evaluated (non-uniform)
+%   S4  - scintillation index from ispectrum.log
 
-IspecParams=generateIspecParams(U,p1,p2,mu0);
-fclose('all');      %Seems to be necessary to avoid error with multiple calls CLR Nov 2016
+%% Validate required args
+if ~(ischar(cpssm_root_dir) || isstring(cpssm_root_dir))
+    error('Ispectrum:InvalidArgs', 'Expected cpssm_root_dir as a string/char path.');
+end
+cpssm_root_dir = char(cpssm_root_dir);
 
-% determine the executable
-if isunix % GNU/Linux
+%% Parse optional arguments
+p = inputParser;
+p.FunctionName = mfilename;
+addParameter(p, 'mu_outer', 0.0, @(x) isnumeric(x) && isscalar(x));
+addParameter(p, 'mu_inner', 0.0, @(x) isnumeric(x) && isscalar(x));
+parse(p, varargin{:});
+
+mu_outer = p.Results.mu_outer;
+mu_inner = p.Results.mu_inner;
+
+%% Resolve executable
+if isunix
     ispectrum_exe = 'ispectrum';
-elseif ispc % Windows
+elseif ispc
     ispectrum_exe = 'ispectrum.exe';
-elseif ismac % MacOS
-    error('There is executable for macOS. Compile Ispectrum for this operating system');
+elseif ismac
+    error('There is no executable for macOS. Compile Ispectrum for this operating system.');
 else
     error('Unknown operating system.');
 end
 
-[status,result]= system(['"',fullfile(cspsm_root_dir,'libs','plots','Ispectrum',ispectrum_exe),'" ',IspecParams]);
-if status~=0
-    error(result)
+exe_path = fullfile(cpssm_root_dir, 'libs', 'plots', 'Ispectrum', ispectrum_exe);
+
+IspecParams = generateIspecParams(U, p1, p2, mu0, mu_outer, mu_inner);
+
+% Outputs (initialize)
+Imu = [];
+mu = [];
+S4 = NaN;
+cmd_output = '';
+
+% Clean up any stale files
+cleanup_ispectrum_files();
+
+%% Option 1: compute S4
+% NOTE: the options of ispectrum are controlled by the number of arguments passed.
+cmd = ['"', exe_path, '" ', IspecParams];
+[status, cmd_output] = system(cmd);
+if status ~= 0
+    error(cmd_output)
 end
-%NOTE: .dat and .log files are written in pwd
-fid=fopen(fullfile('ispectrum.log'),'r');
-logtxt=textscan(fid,'%s');
-if ~isempty(varargin)
-    fprintf('Ustar      U1        U2        p1       p2     mu0   mu_o  mu_i      S4    sigP    sigNfc num \n')
-    for n=14:25
-        str=logtxt{1}{n};
-        fprintf('%5.2f   ',str2num(str))
-    end
-    fprintf('\n')
+
+fid = fopen(fullfile('ispectrum.log'), 'r');
+if fid < 0
+    error('Ispectrum fault: ispectrum.log not found.');
 end
-S4=str2double(logtxt{1}{22});
-if mu0>=1
-    Cpp=U;
-else
-    Cpp=U/mu0^(p2-p1);
+logtxt = textscan(fid, '%s');
+fclose(fid);
+S4 = str2double(logtxt{1}{22});
+
+data = importdata(fullfile('ispectrum.dat'));
+[~, ndata] = size(data);
+if ndata ~= 3
+    cleanup_ispectrum_files();
+    error('Ispectrum fault: unexpected data format in ispectrum.dat.');
 end
-data=importdata(fullfile('ispectrum.dat'));
-[~,ndata]=size(data);
-if ndata~=3
-    fclose('all');
-    error('Ispectrum fault ')
-else
-mu=data(:,1);
-Imu=data(:,2);
-nstp=data(:,3);
-end
-fclose('all');
-delete(fullfile('ispectrum.dat'));
-delete(fullfile('ispectrum.log'));
+
+mu = data(:, 1);
+Imu = data(:, 2);
+
+cleanup_ispectrum_files();
 return
+
+% Auxiliary function to clean up temporary files
+    function cleanup_ispectrum_files()
+        fclose('all');
+        if exist('ispectrum.dat', 'file')
+            delete(fullfile('ispectrum.dat'));
+        end
+        if exist('ispectrum.log', 'file')
+            delete(fullfile('ispectrum.log'));
+        end
+    end
+
+end
