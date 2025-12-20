@@ -82,10 +82,10 @@ function [propagated_complex_field, theo_phase_psd, ...
 %                                               ratio, ...
 %                                               seed_val);
 % References:
-%   [2] "Display_SpectraModel.m" from the GNSS Scintillation Simulator
-%       examples, available at
-%       https://github.com/cu-sense-lab/gnss-scintillation-simulator/blob/master/examples/Display_SpectraModel.m
-%       [Accessed: 10-02-2025].
+%   [1] C. S. Carrano and C. L. Rino, “A theory of scintillation for 
+%       two‐component power law irregularity spectra: Overview and 
+%       numerical results,” Radio Science, vol. 51, no. 6, pp. 789–813, 
+%       June 2016, https://doi.org/10.1002/2015RS005903.
 %
 % Author:
 %   Rubem Vasconcelos Pacelli
@@ -108,8 +108,20 @@ spectral_params = out.(constellation).spectral.(freq_name);
 temporal_support = sim_params.temporal_support;
 seed = sim_params.seed;
 
-% normalized frequency axis
-% TODO: add a `SEE:` codetag with a ref for the computation of μ
+% Normalized wavenumber axis (Carrano/Rino convention).
+%
+% We model what is observed as a *time series* resulting from scanning a
+% spatial phase screen with an effective scan velocity v_eff. Carrano relates
+% temporal frequency f [cycles/s] to the normalized transverse wavenumber mu
+% through:
+%   mu = 2*pi*f*(rho_F/v_eff)
+%
+% Notes:
+%   - mu is an *angular* normalized wavenumber (radians), consistent with
+%     Carrano's use of cos(mu*xi) / exp(j*mu*xi) and the 1/(2*pi) inverse-Fourier
+%     normalization in [1].
+%   - `rhof_veff_ratio` is (rho_F / v_eff). Larger values stretch the same
+%     Doppler axis to larger mu.
 mu = 2 * pi * doppler_frequency * rhof_veff_ratio;
 D_mu = mu(2) - mu(1);
 
@@ -146,23 +158,32 @@ intensity_psd_1sided_post = compute_psd_1sided(postprop_amplitude.^2, ...
 s4 = get_S4(postprop_amplitude.^2);
 
 %% Pre- and Postpropagated PSD of the phase
-% NOTE: Both intensity(?) and phase are normalized by
-% `rhof_veff_ratio` to agree with the code in [2].
+% PSDs computed here are *per-Hz* (Doppler frequency domain) because the input
+% is a time series and `compute_psd_1sided` normalizes by df.
+%
+% When comparing against Carrano/Rino theoretical SDFs (functions of angular mu),
+% you have two equivalent choices:
+%   (A) Convert PSD_f(f) to a per-mu PSD via df/dmu, where mu = 2*pi*f*(rho_F/v_eff).
+%   (B) Convert PSD_f(f) to Carrano's SDF convention directly:
+%         PSD_f(f) = (rho_F/v_eff) * P(mu(f))  =>  P_est(mu) = PSD_f / (rho_F/v_eff)
+%
+% The plotting code in `plot_scintillation_psd.m` uses (B) so both intensity and
+% phase are shown in Carrano's I(mu) / P(mu) conventions.
 
 % NOTE: detrended_phase_realization contains only the refractive-related
 % effect of the phase disturbance at the IPP point,
 % which has not been propagated to the receiver yet
 % SEE: `plot(mu(mu>0), preprop_phase_psd_1sided)`
 preprop_phase_psd_1sided  = compute_psd_1sided(detrended_phase_realization, ...
-    nfft, doppler_frequency) / rhof_veff_ratio;
+    nfft, doppler_frequency);
 
 % NOTE: `phase(scint_field)` is the phase of the complex field
 % after the propagation, which contains not only the refractive
 % part, but also the difracted part caused by the free-space
 % propagation
 % SEE: `plot(mu(mu>0), postprop_phase_psd_1sided)`
-postprop_phase_psd_1sided = compute_psd_1sided(unwrap(angle(propagated_complex_field)), ...
-    nfft, doppler_frequency) / rhof_veff_ratio;
+postprop_phase_psd_1sided = compute_psd_1sided(get_corrected_phase(propagated_complex_field), ...
+    nfft, doppler_frequency);
 
 %% Timeseries generation (and truncation)
 % NOTE: `timetable` is recommended over `timeseries`. Timetables can store

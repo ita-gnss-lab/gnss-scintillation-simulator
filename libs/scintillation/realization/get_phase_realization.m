@@ -62,8 +62,14 @@ function detrended_phase_realization = get_phase_realization(norm_phase_sdf, D_m
 % [1] Rino C, Breitsch B, Morton Y, Jiao Y, Xu D, Carrano C. A compact 
 %     multi-frequency GNSS scintillation model. NAVIGATION. 2018; 65: 
 %     563–569. https://doi.org/10.1002/navi.263
-% [2] C. Rino, The Theory of Scintillation with Applications in Remote
-%     Sensing. John Wiley & Sons, 2011
+% [2] C. S. Carrano and C. L. Rino, “A theory of scintillation for 
+%     two‐component power law irregularity spectra: Overview and 
+%     numerical results,” Radio Science, vol. 51, no. 6, pp. 789–813, 
+%     June 2016, https://doi.org/10.1002/2015RS005903.
+% [3] Y. Jiao, C. Rino, and Y. T. Morton, “Ionospheric Scintillation 
+%     Simulation on Equatorial GPS Signals for Dynamic Platforms”, 
+%     J Inst Navig, vol. 65, no. 2, pp. 263–274, 
+%     June 2018, https://doi.org/10.1002/navi.231.
 %
 % Author: Rodrigo de Lima Florindo
 % ORCID: https://orcid.org/0000-0003-0412-5583
@@ -74,11 +80,19 @@ function detrended_phase_realization = get_phase_realization(norm_phase_sdf, D_m
     % Note that the variance of xi is sqrt(2).
     xi = randn(1, nfft, data_type) + 1i * randn(1, nfft, data_type);
 
-    % Compute the square-root of the normalized phase SDF.
+    % Compute the square-root weighting applied to white noise.
+    %
+    % Here, `norm_phase_sdf` is Carrano/Rino's phase SDF P(mu), expressed as a
+    % function of the *angular* normalized wavenumber mu (radians).
+    %
+    % A statistically-equivalent phase realization can be synthesized by
+    % imposing the desired spectrum on white noise. In discrete form [Eq. 8, 3],
+    % each spectral bin contributes with amplitude:
+    %   sqrt( P(n * mu) * Δμ / (2π) )
     root_norm_phase_sdf = sqrt(norm_phase_sdf * D_mu / (2*pi));
 
     % Obtain the phase realization by taking the real part of the
-    % inverse Fourier transform (with shift operations), which corresponds to equation (22) of (1).
+    % inverse Fourier transform.
     phase_realization = real(fftshift(fft(fftshift(root_norm_phase_sdf .* xi))));
 
     %Remove linear trend to force segment too segment continuity
