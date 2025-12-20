@@ -33,11 +33,11 @@ function plot_scintillation_time_series(out)
 severities = out.severity;
 screen_dpi = get(0, 'ScreenPixelsPerInch');
 font_scale = max(0.75, min(1.0, screen_dpi / 120));
-font_axis = round(12 * font_scale);
-font_label = round(13 * font_scale);
-font_title = round(14 * font_scale);
-font_legend = round(11 * font_scale);
-font_sgtitle = round(16 * font_scale);
+font_axis = round(14 * font_scale);
+font_label = round(15 * font_scale);
+font_title = round(16 * font_scale);
+font_legend = round(13 * font_scale);
+font_sgtitle = round(18 * font_scale);
 
 %% Plot
 constellations = setxor(string(fieldnames(out)).', ...
@@ -47,20 +47,16 @@ for constellation = constellations
     % Frequency names for this constellation
     freq_names = string(fieldnames(out.(constellation).spectral)).';
     % for all rx-sat scenario
-    for i = 1:numel(out.(constellation).scenario)
-        for severity = severities
-            % Create figure and set Helvetica as default font
-            fig = figure('Name', sprintf('%s Magnitude & Phase ', severity), ...
-                'Position', [50, 50, 1400, 550], ...
-                'Color', 'none', 'InvertHardcopy', 'off');
-            try
-                set(fig, 'WindowState', 'maximized');
-            catch
-                % Fallback for older MATLAB releases without WindowState support
-                set(fig, 'Units', 'normalized', 'OuterPosition', [0 0 1 1]);
-            end
-            set(fig, 'DefaultTextFontName', 'Helvetica');
-            tiledlayout(2, 1, "TileSpacing", "compact");
+	    for i = 1:numel(out.(constellation).scenario)
+	        for severity = severities
+	            % Create figure and set Helvetica as default font
+	            fig = figure('Name', sprintf('%s Magnitude & Phase ', severity), ...
+	                'Units', 'pixels', ...
+	                'Position', [100, 100, 1100, 520], ...
+	                'Color', 'none', 'InvertHardcopy', 'off');
+	            set(fig, 'PaperPositionMode', 'auto');
+	            set(fig, 'DefaultTextFontName', 'Helvetica');
+	            tiledlayout(2, 1, "TileSpacing", "compact");
 
             % Initialize storage for legend labels and S4 values
             legend_labels = cell(1, numel(freq_names));
@@ -105,20 +101,12 @@ for constellation = constellations
             grid on;
             hold off;
 
-            sgtitle(sprintf('Magnitude & Phase Analysis: %s | %s satellite %s', ...
-                severity, ...
-                upper(out.(constellation).scenario(i).sat.OrbitPropagator), ...
-                out.(constellation).scenario(i).sat.Name), 'FontSize', font_sgtitle, ...
-                'FontName', 'Helvetica', 'Interpreter', 'none');
-
-            % Adjust figure paper size to match figure aspect ratio
-            set(fig, 'PaperUnits', 'centimeters');
-            fig_pos = get(fig, 'Position');
-            fig_width_cm = fig_pos(3) * 2.54 / 96;
-            fig_height_cm = fig_pos(4) * 2.54 / 96;
-            set(fig, 'PaperSize', [fig_width_cm fig_height_cm]);
-            set(fig, 'PaperPosition', [0 0 fig_width_cm fig_height_cm]);
-        end
-    end
-end
-end
+	            sgtitle(sprintf('Magnitude & Phase Analysis: %s | %s satellite %s', ...
+	                severity, ...
+	                upper(out.(constellation).scenario(i).sat.OrbitPropagator), ...
+	                out.(constellation).scenario(i).sat.Name), 'FontSize', font_sgtitle, ...
+	                'FontName', 'Helvetica', 'Interpreter', 'none');
+	        end
+	    end
+	end
+	end

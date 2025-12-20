@@ -3,7 +3,7 @@ function [propagated_complex_field, theo_phase_psd, ...
     intensity_psd_1sided_post, s4, preprop_phase_psd_1sided, ...
     postprop_phase_psd_1sided] ...
     = get_scintillation_realization(sim_params, out, constellation, ...
-    freq_name, rhof_veff_ratio, nfft, varargin)
+    freq_name, rhof_veff_ratio, nfft)
 % get_scintillation_time_series
 %
 % Syntax:
@@ -54,7 +54,7 @@ function [propagated_complex_field, theo_phase_psd, ...
 %   - get_norm_phase_sdf(mu, irr_params)
 %       Computes a normalized phase spectral density function given mu and
 %       irregularity parameters.
-%   - get_phase_realization(norm_phase_sdf, D_mu, seed)
+%   - get_phase_realization(norm_phase_sdf, D_mu, nfft, seed)
 %       Generates a random (possibly complex) phase realization using the
 %       normalized phase spectral density. Requires a parameter D_mu not shown
 %       in this snippet.
@@ -97,12 +97,6 @@ function [propagated_complex_field, theo_phase_psd, ...
 %   Email: rdlfresearch@gmail.com
 
 %% Initialization
-% FIXME: This varargin should be removed as it seems not necessary anymore
-p = inputParser;
-addParameter(p, 'data_type', 'double', @(x) ischar(x) || isstring(x));
-parse(p, varargin{:});
-data_type = p.Results.data_type;
-
 doppler_frequency = out.doppler_frequency_support;
 spectral_params = out.(constellation).spectral.(freq_name);
 temporal_support = sim_params.temporal_support;
@@ -115,6 +109,9 @@ seed = sim_params.seed;
 % temporal frequency f [cycles/s] to the normalized transverse wavenumber mu
 % through:
 %   mu = 2*pi*f*(rho_F/v_eff)
+% NOTE:
+%   `out.doppler_frequency_support` is `fftshift`-ordered; downstream synthesis
+%   uses `ifftshift` (see `get_phase_realization.m`) to map into FFT bin order.
 %
 % Notes:
 %   - mu is an *angular* normalized wavenumber (radians), consistent with
@@ -140,7 +137,7 @@ theo_phase_psd = get_theorerical_phase_psd(mu, spectral_params);
 % NOTE: we call it "detrented" because there is a function called `linex()`
 % which removes the linear trend of the phase realization.
 detrended_phase_realization = get_phase_realization(theo_phase_psd, ...
-    D_mu, nfft, seed, data_type);
+    D_mu, nfft, seed);
 
 %% Propagate the scintillation field, i.e., `e^(1j*detrended_phase_realization)`
 propagated_complex_field = get_propagated_field(mu, detrended_phase_realization);
