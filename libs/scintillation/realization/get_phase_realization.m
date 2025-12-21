@@ -113,6 +113,8 @@ function xi_fft = hermitian_complex_white_noise(nfft)
 
     if mod(nfft, 2) == 0
         % Even length: Nyquist bin exists and must be real.
+        % NOTE: If it is not real, a tiny imaginary part may appear after
+        % the ifft.
         xi_fft(nfft/2 + 1) = randn(1, 1);
         % k_max is the Nyquist bin index.
         k_max = nfft/2;
