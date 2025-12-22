@@ -150,13 +150,13 @@ postprop_phase = get_corrected_phase(propagated_complex_field);
 
 %% Postpropagated PSD of the amplitude (Intensity PSD)
 % SEE: `plot(mu(mu>0), 10*log10(intensity_psd_1sided_post))`
-intensity_psd_1sided_post = compute_psd_1sided(postprop_amplitude.^2, ...
-    nfft, doppler_frequency);
+intensity_psd_1sided_post = compute_psd(postprop_amplitude.^2, ...
+    nfft, sim_params.t_samp);
 s4 = get_S4(postprop_amplitude.^2);
 
 %% Pre- and Postpropagated PSD of the phase
 % PSDs computed here are *per-Hz* (Doppler frequency domain) because the input
-% is a time series and `compute_psd_1sided` normalizes by df.
+% is a time series and `compute_psd` normalizes by df.
 %
 % When comparing against Carrano/Rino theoretical SDFs (functions of angular mu),
 % you have two equivalent choices:
@@ -171,16 +171,16 @@ s4 = get_S4(postprop_amplitude.^2);
 % effect of the phase disturbance at the IPP point,
 % which has not been propagated to the receiver yet
 % SEE: `plot(mu(mu>0), preprop_phase_psd_1sided)`
-preprop_phase_psd_1sided  = compute_psd_1sided(detrended_phase_realization, ...
-    nfft, doppler_frequency);
+preprop_phase_psd_1sided  = compute_psd(detrended_phase_realization, ...
+    nfft, sim_params.t_samp);
 
 % NOTE: `phase(scint_field)` is the phase of the complex field
 % after the propagation, which contains not only the refractive
 % part, but also the difracted part caused by the free-space
 % propagation
 % SEE: `plot(mu(mu>0), postprop_phase_psd_1sided)`
-postprop_phase_psd_1sided = compute_psd_1sided(get_corrected_phase(propagated_complex_field), ...
-    nfft, doppler_frequency);
+postprop_phase_psd_1sided = compute_psd(get_corrected_phase(propagated_complex_field), ...
+    nfft, sim_params.t_samp);
 
 %% Timeseries generation (and truncation)
 % NOTE: `timetable` is recommended over `timeseries`. Timetables can store
@@ -203,11 +203,33 @@ end
 
 % -------------------------------------------------------------------------
 
-function psd_1sided = compute_psd_1sided(real_signal, nfft, ...
-    doppler_freq)
-% Compute the one-sided power spectral density function (PSD)
-raw_fft = abs(fft(real_signal, nfft)).^2 / nfft;
-partial_psd = raw_fft(2 : (nfft/2));
-df = abs(doppler_freq(2) - doppler_freq(1));
-psd_1sided = partial_psd / (nfft * df);
+function psd_1sided = compute_psd(real_signal, nfft, t_samp)
+% Compute the PSD using Welch's method (pwelch).
+%
+% NOTE: The output is NOT the "true" one-sided PSD because we do not multiply
+% NOTE: by 2. Instead, we return only the right-side of the two-sided PSD
+% NOTE: (strictly positive frequencies, excluding DC and Nyquist).
+% NOTE: This matches Carrano/Rino's I(mu) and P(mu) conventions, which are
+% NOTE: defined for mu>0.
+%
+% NOTE: MATLAB's `pwelch(...,'onesided')` returns a one-sided PSD where
+% NOTE: positive-frequency power is doubled (except DC and Nyquist) so that
+% NOTE: integrating over [0, Fs/2] matches total variance. To recover the
+% NOTE: right-side of the two-sided PSD, we simply divide those bins by 2.
+%
+% NOTE: We remove the DC (mean) before windowing. Otherwise, the window
+% NOTE: spreads the mean value into nearby frequency bins (spectral leakage),
+% NOTE: creating a small low-frequency "bump". The previous FFT-based
+% NOTE: implementation implicitly avoided this by excluding the DC bin.
+Fs = 1 / t_samp;
+
+% Use a single Welch segment with a periodic Hamming window (spectral-analysis
+% friendly; aligns with FFT periodicity assumptions).
+win = hamming(nfft);
+noverlap = 0;
+
+x = real_signal(:);
+x = x - mean(x);
+psd_onesided = pwelch(x, win, noverlap, nfft, Fs, 'onesided');
+psd_1sided = psd_onesided(2:(nfft/2)) / 2;
 end

@@ -10,8 +10,10 @@ function [Imu, mu, S4] = Ispectrum(cpssm_root_dir, U, p1, p2, mu0, varargin)
 %   UNC paths (e.g., \\wsl.localhost\...). If MATLAB's current folder is a
 %   UNC path, `cmd.exe` will fall back to a Windows folder and `ispectrum`
 %   may fail to write ispectrum.dat/ispectrum.log (or write them elsewhere).
-%   To avoid this, this wrapper always runs `ispectrum` in a local temp
-%   directory and reads outputs from there.
+%   To avoid this, this wrapper always:
+%     (1) runs `ispectrum` from a local temp directory; and
+%     (2) on Windows, copies the executable into that temp directory so the
+%         command line never references UNC paths.
 %
 % Calling convention:
 %   [Imu, mu, S4] = Ispectrum(cpssm_root_dir, U, p1, p2, mu0)
@@ -80,16 +82,35 @@ data_path = fullfile(run_dir, 'ispectrum.dat');
 log_path = fullfile(run_dir, 'ispectrum.log');
 
 try
-    %% Option 1: compute S4
-    % NOTE: the options of ispectrum are controlled by the number of arguments passed.
+    %% Option 1: compute S4 (and write ispectrum.dat/ispectrum.log)
+    % NOTE: ispectrum's options are controlled by the number of arguments passed.
+    %
+    % Important: on Windows, `system()` launches `cmd.exe` with MATLAB's current
+    % directory. If MATLAB is running from a UNC path, `cmd.exe` can fail before
+    % it even executes our command. So we temporarily `cd` to a local temp dir.
+    orig_dir = pwd;
+    dir_restore = onCleanup(@() safe_cd(orig_dir));
+
+    % Avoid referencing UNC paths on Windows by copying the executable locally.
+    local_exe_path = exe_path;
     if ispc
-        cmd = sprintf('cd /d "%s" && "%s" %s', run_dir, exe_path, IspecParams);
-    else
-        cmd = sprintf('cd "%s" && "%s" %s', run_dir, exe_path, IspecParams);
+        local_exe_path = fullfile(run_dir, ispectrum_exe);
+        copyfile(exe_path, local_exe_path);
     end
+
+    safe_cd(run_dir);
+    cmd = sprintf('"%s" %s', local_exe_path, IspecParams);
     [status, cmd_output] = system(cmd);
-    if status ~= 0
-        error(cmd_output);
+    % Always restore the original directory before cleanup/removal.
+    safe_cd(orig_dir);
+    clear dir_restore;
+
+    % Some Windows/UNC combinations may produce a nonzero exit code even when
+    % ispectrum generated the expected output files. Prefer file existence.
+    if status ~= 0 && (~exist(log_path, 'file') || ~exist(data_path, 'file'))
+        error('Ispectrum:ExecutionFailed', 'ispectrum failed (exit code %d).\nOutput:\n%s', status, cmd_output);
+    elseif status ~= 0
+        warning('Ispectrum:NonZeroExit', 'ispectrum exited with code %d but produced output files; continuing.\nOutput:\n%s', status, cmd_output);
     end
     
     if ~exist(log_path, 'file')
@@ -133,11 +154,21 @@ try
     mu = data(:, 1);
     Imu = data(:, 2);
 catch ME
+    if exist('orig_dir', 'var')
+        safe_cd(orig_dir);
+    end
     cleanup_ispectrum_files(run_dir);
     rethrow(ME);
 end
 
 cleanup_ispectrum_files(run_dir);
+end
+
+function safe_cd(target_dir)
+    try
+        cd(target_dir);
+    catch
+    end
 end
 
 % Auxiliary function to clean up temporary files

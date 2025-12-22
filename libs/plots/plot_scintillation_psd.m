@@ -121,7 +121,7 @@ for constellation = constellations
             phase_psd_1sided_theory = out.(constellation).scenario(i).(freq_name).phase.psd.theo_phase;
             s4 = out.(constellation).scenario(i).(freq_name).S4;
 
-            % Compute theoretical intensity spectrum I(mu) from ispectrum's
+            %% Compute theoretical intensity spectrum I(mu) from ispectrum's
             % adaptive mu samples and interpolate onto the simulated mu grid.
             idx_pos = frequency_support > 0;
             f_pos = frequency_support(idx_pos);
