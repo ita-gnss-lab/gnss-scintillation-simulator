@@ -72,4 +72,9 @@ sim_params.max_sats = parsed_argin.max_sats;  % cap how many satellites we bothe
 % NOTE: this sampling time is the value used to obtain the scintillation
 % time series realization as well as its intensity and phase PSD
 sim_params.t_samp = parsed_argin.t_samp;
+
+%% Optional override for rho_F/v_eff at L1
+if isfield(parsed_argin, 'rhof_veff_ratio_L1') && ~isempty(parsed_argin.rhof_veff_ratio_L1)
+    sim_params.rhof_veff_ratio_L1 = double(parsed_argin.rhof_veff_ratio_L1);
+end
 end

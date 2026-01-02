@@ -183,6 +183,13 @@ function out = cpssm(varargin)
 %                         vdz: up-down velocity (downward +).
 %                       Default: [0; 100; 0].
 %
+%   'rhof_veff_ratio_L1' - (optional, positive scalar) Override for the
+%                       reference scaling parameter (rho_F / v_eff) at L1.
+%                       When provided, geometry-based scaling is bypassed
+%                       and this value is used as the reference for
+%                       frequency extrapolation.
+%                       Default: computed from scenario geometry.
+%
 %   'elevation_mask_deg' - (optional, degrees, scalar) Minimum elevation
 %                       angle mask applied during LOS filtering. Satellites
 %                       whose elevation drops below this mask at any time in

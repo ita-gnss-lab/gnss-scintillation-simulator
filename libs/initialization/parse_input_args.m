@@ -21,6 +21,7 @@ default_is_play         = false;                                % Whether play a
 default_seed            = 1;                                    % Default seed
 default_elev_mask_deg   = 25;                                   % Minimum elevation angle mask (deg)
 default_max_sats        = Inf;                                  % Maximum satellites to simulate
+default_rhof_veff_ratio_L1 = NaN;                               % Optional override for rho_F/v_eff at L1
 
 %% Parsing phase 0: resolve the logging before anything else
 
@@ -81,6 +82,9 @@ addParameter(p, 'ipp_altitude',  default_ipp_altitude, ...
 % Add drift_vel parameter: must be a numeric 3-element vector.
 addParameter(p, 'drift_vel_ned',   default_drift_vel_ned, ...
     @(x) isnumeric(x) && isvector(x) && numel(x)==3);
+% Add optional rhof_veff_ratio_L1 override: positive scalar or empty
+addParameter(p, 'rhof_veff_ratio_L1', default_rhof_veff_ratio_L1, ...
+    @(x) isempty(x) || (isnumeric(x) && isscalar(x) && isfinite(x) && x > 0));
 % add constellation parameter: it must be one of the valid strings
 addParameter(p, 'constellation', default_constellations, ...
     @(x) validate_constellation(log, all_constellation, x));
@@ -152,6 +156,7 @@ parsed_input_args.seed                = p.Results.seed;                         
 parsed_input_args.spectral            = p.Results.spectral;
 parsed_input_args.elevation_mask_deg  = p.Results.elevation_mask_deg;           % minimum elevation angle (deg)
 parsed_input_args.max_sats            = p.Results.max_sats;                     % maximum satellites to simulate
+parsed_input_args.rhof_veff_ratio_L1  = p.Results.rhof_veff_ratio_L1;            % optional override for rho_F/v_eff at L1
 
 % If severity is 'custom', validate the provided spectral struct
 if parsed_input_args.severity == "custom"

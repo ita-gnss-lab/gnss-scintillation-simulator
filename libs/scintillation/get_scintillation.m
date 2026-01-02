@@ -54,8 +54,12 @@ for sat = sim_params.satelliteScenario.Satellites
         out.(sat_constellation).scenario(end+1).sat = sat;
         out.(sat_constellation).scenario(end).rx = rx;
         % for this geometry propagation, get the ρF/veff for the reference
-        % frequency
-        rhof_veff_ratio_ref = get_scaling_param(rx, sat, sim_params);
+        % frequency (allow override if supplied)
+        if isfield(sim_params, 'rhof_veff_ratio_L1') && ~isnan(sim_params.rhof_veff_ratio_L1)
+            rhof_veff_ratio_ref = sim_params.rhof_veff_ratio_L1;
+        else
+            rhof_veff_ratio_ref = get_scaling_param(rx, sat, sim_params);
+        end
         
             % for all valid frequencies for this satellite contellation
             for j = 1:numel(sim_params.freqs.(sat_constellation).name)
@@ -105,4 +109,3 @@ out.satelliteScenario = sim_params.satelliteScenario;
 % Severity
 out.severity = sim_params.severity;
 end
-
