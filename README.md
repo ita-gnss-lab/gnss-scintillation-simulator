@@ -111,7 +111,24 @@ This refactored version of the GNSS Scintillation Simulator was developed by:
     *   ORCID: [https://orcid.org/0000-0003-0412-5583](https://orcid.org/0000-0003-0412-5583)
     *   Email: [rdlfresearch@gmail.com](mailto:rdlfresearch@gmail.com)
 
-## 6. Forking acknowledge from cu-sense-lab/gnss-scintillation-simulator
+## 6. Cite me
+
+```bib
+@software{pacelliItagnsslabGnssscintillationsimulator2025,
+  title = {Ita-Gnss-Lab/Gnss-Scintillation-Simulator},
+  author = {Pacelli, Rubem Vasconcelos and Florindo, Rodrigo de Lima},
+  date = {2025-07-07T20:09:03Z},
+  origdate = {2024-12-27T12:23:22Z},
+  location = {Instituto Tecnol\'ogico de Aeron\'autica},
+  url = {https://github.com/ita-gnss-lab/gnss-scintillation-simulator},
+  urldate = {2025-08-11},
+  abstract = {A project for simulating ionosphere phase and amplitude scintillation in the GNSS band for scientific and engineering applications.},
+  organization = {ITA GPS/GNSS Laboratory},
+  keywords = {gnss,ionospheric-scintillation,kalman-filter,matlab,synchronization}
+}
+```
+
+## 7. Forking acknowledge from cu-sense-lab/gnss-scintillation-simulator
 
 This project is a fork of the original GNSS Scintillation Simulator developed by the CU SENSE Lab at the University of Colorado.
 
