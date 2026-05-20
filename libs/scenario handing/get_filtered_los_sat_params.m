@@ -27,7 +27,12 @@ function filtered_los_sat_params = get_filtered_los_sat_params(log, sim_params, 
     end
     
     %% Get SVID-filtered LOS satellites
-    % TODO: also filter by SVIDs
+    requested_svids = string(sim_params.svids);
+    if ~isempty(requested_svids) && ~(isscalar(requested_svids) && (requested_svids == "" || lower(requested_svids) == "all"))
+        source_svids = arrayfun(@source_to_svid, filtered_los_sat_params.Source);
+        keep_svid = ismember(source_svids, upper(requested_svids));
+        filtered_los_sat_params = filtered_los_sat_params(keep_svid, :);
+    end
     
     %% Apply elevation mask
     mask_deg = sim_params.elevation_mask_deg;
@@ -52,5 +57,21 @@ function filtered_los_sat_params = get_filtered_los_sat_params(log, sim_params, 
     filtered_los_sat_params = filtered_los_sat_params(keep, :);
     if height(filtered_los_sat_params) > sim_params.max_sats
         filtered_los_sat_params = filtered_los_sat_params(1:sim_params.max_sats, :); % enforce cap to avoid simulating unused sats
+    end
+end
+
+function svid = source_to_svid(source)
+    source = char(strtrim(string(source)));
+    tokens = regexp(source, '(\d+)', 'tokens', 'once');
+    if isempty(tokens)
+        svid = "";
+        return;
+    end
+    if contains(source, 'PRN:')
+        svid = "G" + string(sprintf('%02d', str2double(tokens{1})));
+    elseif contains(source, 'GAL Sat ID:')
+        svid = "E" + string(sprintf('%02d', str2double(tokens{1})));
+    else
+        svid = string(source);
     end
 end
