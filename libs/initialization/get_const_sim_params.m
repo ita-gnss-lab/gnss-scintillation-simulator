@@ -71,7 +71,7 @@ sim_params.const.spectral.strong.mu0_ref = 0.55;
 sim_params.const.spectral.strong.p1      = 2.45;
 sim_params.const.spectral.strong.p2      = 3.7;
 % TODO: cite ref
-sim_params.const.spectral.moderate.U_ref = 0.4;
+sim_params.const.spectral.moderate.U_ref = 0.6;
 sim_params.const.spectral.moderate.mu0_ref = 0.7;
 sim_params.const.spectral.moderate.p1 = 2.7;
 sim_params.const.spectral.moderate.p2 = 3.3;
