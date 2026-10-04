@@ -66,7 +66,7 @@ sim_params.const.all_freqs.name.beidou  = ["B1", "B2", "B3"];
 % NOTE: frequency (there is no extrapolation step for p1 and p2).
 
 % TODO: cite ref
-sim_params.const.spectral.strong.U_ref   = 2;
+sim_params.const.spectral.strong.U_ref   = 10;
 sim_params.const.spectral.strong.mu0_ref = 0.55;
 sim_params.const.spectral.strong.p1      = 2.45;
 sim_params.const.spectral.strong.p2      = 3.7;
